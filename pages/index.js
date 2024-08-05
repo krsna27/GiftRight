@@ -43,7 +43,7 @@ export default function Home() {
             )}
             {Charity.map((item, index) => (
               <Link href={`/charity-details/${item.id}`} key={index}>
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div className="bg-slate-100 rounded-lg shadow-lg overflow-hidden hover:bg-white transition-colors duration-200">
                   <div className="p-4">
                     <div className="w-full h-32 sm:h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mx-auto mb-4">
                       <img
