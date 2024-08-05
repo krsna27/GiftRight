@@ -13,7 +13,6 @@ export default function CharityListings() {
   const fetchCharityList = async () => {
     try {
       const res = await axios.get("/api/getCharity");
-      <h1>Charr</h1>
       console.log("Charity data received:", res.data); // Log the response data
       return res.data.charities; // Return charities directly
     } catch (error) {
@@ -22,7 +21,7 @@ export default function CharityListings() {
     }
   };
 
-  const { data, isLoading } = useQuery("charity-list", fetchCharityList);
+  const { data, isLoading, error } = useQuery("charity-list", fetchCharityList);
 
   useEffect(() => {
     if (data) {
@@ -47,64 +46,51 @@ export default function CharityListings() {
               type="text"
               name="search"
               id="search"
-              className="rounded-full p-2 border border-white shadow-2xl w-full"
+              className="rounded-full p-2 border border-gray-300 shadow-lg w-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <br/>
           </div>
 
           {isLoading ? (
             <div className="p-3 text-center font-semibold text-2xl">
               Loading...
             </div>
+          ) : error ? (
+            <div className="p-3 text-center text-red-500 font-semibold text-2xl">
+              Error fetching data. Please try again later.
+            </div>
           ) : (
             <>
-            <div className="font-bold font-weight-600 text-3xl p-3">Charities</div>
-            <div className="grid lg:grid-cols-3 md:grid-cols-3 grid-cols-1 gap-2">
-              
-              {filteredCharities.length === 0 ? (
-                <div className="text-red-500 text-center py-4 text-2xl font-semibold">
-                  No Charities Found!
-                </div>
-              ) : (
-                filteredCharities.map((item, index) => (
-                  <div
-                    className="px-3 py-7 rounded-md shadow-2xl flex justify-start space-x-3"
-                    key={index}
-                  >
-                    
-                    <div className="flex items-center">
-                      <div className="size-[80px] shadow-2xl p-5 rounded-full flex items-center justify-center">
-                        <img
-                          className="w-full h-full rounded-md"
-                          src={`/charity/${item.imgName || item.img_name}`} // Ensure image path
-                          alt="charity-icon"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="mb-2">
-                        <h2 className="text-xl font-semibold capitalize">
-                          {item.name}
-                        </h2>
-                      </div>
-
-                      <Link href={`/charity-details/${item.id}`}>
-                        <button
-                          type="button"
-                          className="py-1 px-2 bg-yellow-400 hover:bg-yellow-500 rounded-md text-black text-sm font-semibold"
-                        >
-                          View
-                        </button>
-                      </Link>
-                    </div>
+              <div className="font-bold text-3xl mb-4">Charities</div>
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+                {filteredCharities.length === 0 ? (
+                  <div className="text-red-500 text-center py-4 text-2xl font-semibold">
+                    No Charities Found!
                   </div>
-                ))
-              )}
-            </div>
+                ) : (
+                  filteredCharities.map((item, index) => (
+                    <Link href={`/charity-details/${item.id}`} key={index}>
+                      <div className="cursor-pointer px-4 py-6 rounded-md shadow-lg flex items-center space-x-4 bg-slate-100 hover:bg-white transition-colors duration-200">
+                        <div className="w-[80px] h-[80px] flex items-center justify-center bg-gray-100 rounded-full overflow-hidden">
+                          <img
+                            className="w-full h-full object-cover"
+                            src={`/charity/${item.imgName || item.img_name}`} // Ensure image path
+                            alt={item.name}
+                          />
+                        </div>
+
+                        <div>
+                          <h2 className="text-xl font-semibold capitalize mb-2">
+                            {item.name}
+                          </h2>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
             </>
           )}
         </section>
