@@ -1,10 +1,11 @@
+// pages/api/ebayImport.js
 import Product from '@/models/Products'; // Import the Sequelize model
 import connectDb from '@/middleware/dbConnect';
 
 const handler = async (req, res) => {
     if (req.method === 'POST') {
         try {
-            const { name, price, link, charityId, imgName } = req.body;
+            const { name, price, link, charityId, imgName, referralCode } = req.body;
 
             // Check if the product already exists and is not deleted
             const existingProduct = await Product.findOne({
@@ -27,7 +28,8 @@ const handler = async (req, res) => {
                 link: link,
                 charity_id: charityId, // Match the field name in the Sequelize model
                 img_name: imgName, // Match the field name in the Sequelize model
-                import_flag: 1 // Match the field name in the Sequelize model
+                import_flag: 1, // Match the field name in the Sequelize model
+                referral_code: referralCode || null // Save referral code if provided
             });
 
             res.status(200).json({ message: "Data Saved Successfully!" });

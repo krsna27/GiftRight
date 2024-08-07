@@ -16,49 +16,68 @@ const Create = () => {
     }
   }, []);
 
-  const [FormData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     itemName: "",
     description: "",
     link: "",
     price: "",
+    referralCode: "",
+    linkType: "ebay", // Default to eBay
   });
 
   const handleChange = (e) => {
-    if (e.target.name == "image") {
-      setFormData({
-        ...FormData,
-        charityId: id,
-        image: e.target.files?.[0],
-      });
-    } else {
-      setFormData({
-        ...FormData,
-        charityId: id,
-        [e.target.name]: e.target.value,
-      });
-    }
+    const { name, value, files } = e.target;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      charityId: id,
+      [name]: files ? files[0] : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Modify the link to include the referral code based on the selected link type
+    let modifiedLink = formData.link;
+    if (formData.referralCode) {
+      if (formData.linkType === "ebay") {
+        modifiedLink += `?referral=${encodeURIComponent(formData.referralCode)}`;
+      } else if (formData.linkType === "amazon") {
+        modifiedLink += `?tag=${encodeURIComponent(formData.referralCode)}`;
+      }
+    }
+
+    const submissionData = {
+      ...formData,
+      link: modifiedLink, // Use the modified link
+    };
+
+    const formDataToSubmit = new FormData();
+    Object.keys(submissionData).forEach((key) => {
+      formDataToSubmit.append(key, submissionData[key]);
+    });
+
     try {
-      const res = await axios.post(`/api/createItem`, FormData, {
+      const res = await axios.post(`/api/createItem`, formDataToSubmit, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      if (res.status == 200) {
+      if (res.status === 200) {
         setFormData({
           itemName: "",
           description: "",
           link: "",
           price: "",
+          referralCode: "",
+          linkType: "ebay", // Reset to default
         });
+        alert("Item imported sucessfully!");
       }
     } catch (error) {
-      alert("Server Downtime, Please Try Again Later!");
+      alert("Incorrect input!");
     }
   };
 
@@ -95,7 +114,7 @@ const Create = () => {
                 </label>
                 <input
                   onChange={handleChange}
-                  value={FormData.itemName}
+                  value={formData.itemName}
                   type="text"
                   name="itemName"
                   id="itemName"
@@ -111,7 +130,7 @@ const Create = () => {
                 </label>
                 <textarea
                   onChange={handleChange}
-                  value={FormData.description}
+                  value={formData.description}
                   name="description"
                   id="description"
                   className="p-2 rounded-md border border-black w-full block"
@@ -121,12 +140,44 @@ const Create = () => {
               </div>
 
               <div>
+                <label htmlFor="linkType">
+                  Link Type:<span className="text-red-500">*</span>
+                </label>
+                <select
+                  onChange={handleChange}
+                  value={formData.linkType}
+                  name="linkType"
+                  id="linkType"
+                  className="p-2 rounded-md border border-black w-full block"
+                  required
+                >
+                  <option value="ebay">eBay</option>
+                  <option value="amazon">Amazon</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="referralCode">
+                  Referral Code:
+                </label>
+                <input
+                  onChange={handleChange}
+                  value={formData.referralCode}
+                  type="text"
+                  name="referralCode"
+                  id="referralCode"
+                  className="p-2 rounded-md border border-black w-full block"
+                  placeholder="Enter Referral Code"
+                />
+              </div>
+
+              <div>
                 <label htmlFor="link">
                   Item Link:<span className="text-red-500">*</span>
                 </label>
                 <input
                   onChange={handleChange}
-                  value={FormData.link}
+                  value={formData.link}
                   type="text"
                   name="link"
                   id="link"
@@ -142,7 +193,7 @@ const Create = () => {
                 </label>
                 <input
                   onChange={handleChange}
-                  value={FormData.price}
+                  value={formData.price}
                   type="number"
                   min={1}
                   name="price"
