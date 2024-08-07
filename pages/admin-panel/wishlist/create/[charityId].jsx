@@ -3,11 +3,13 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Head from "next/head";
 import { AdminLayout } from "../../layout";
+import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
 
 const Create = () => {
   const router = useRouter();
   const params = useParams();
+  const { toast } = useToast();
   const id = params?.charityId;
 
   useEffect(() => {
@@ -53,6 +55,13 @@ const Create = () => {
       link: modifiedLink, // Use the modified link
     };
 
+    const showToast = (type, message) => {
+      toast({
+        description: message,
+        variant: type === "error" ? "destructive" : "default",
+      });
+    };
+
     const formDataToSubmit = new FormData();
     Object.keys(submissionData).forEach((key) => {
       formDataToSubmit.append(key, submissionData[key]);
@@ -74,10 +83,10 @@ const Create = () => {
           referralCode: "",
           linkType: "ebay", // Reset to default
         });
-        alert("Item imported sucessfully!");
+        showToast("success", "Item Imported Successfully!");
       }
     } catch (error) {
-      alert("Incorrect input!");
+      showToast("error", "Recheck your input");
     }
   };
 
